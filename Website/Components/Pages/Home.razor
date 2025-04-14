@@ -1,0 +1,64 @@
+﻿@page "/"
+
+@using Microsoft.EntityFrameworkCore
+@using Shared
+@using Shared.Models
+
+@inject IDbContextFactory<DietDbContext> DbContextFactory
+
+<PageTitle>Diety</PageTitle>
+
+<div class="container">
+  <h1>Diety</h1>
+
+  <h2>@_currentDate</h2>
+
+  <div class="card">
+    <div class="card-body">
+      @foreach (Meal meal in _diet.Meals)
+      {
+        <h3 class="card-title">@(meal.Description)</h3>
+        <h6 class="card-subtitle mb-2 text-body-secondary">
+          <b>Sposób przygotowania:</b> @string.Join(" ", @meal.Preparation)
+        </h6>
+
+        <table class="table">
+          @foreach (Ingredient ing in meal.Ingredients)
+          {
+            <tbody>
+              <tr>
+                <td>@ing.Name</td>
+                <td>@ing.Quantity</td>
+                <td>@ing.Details</td>
+              </tr>
+            </tbody>
+          }
+        </table>
+
+        <hr />
+      }
+    </div>
+  </div>
+</div>
+@code
+{
+  private Diet _diet = new();
+  private DateOnly _currentDate = DateOnly.FromDateTime(DateTime.Now);
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      await using DietDbContext ctx = await DbContextFactory.CreateDbContextAsync();
+      _diet = await ctx
+      .Diets
+      .Where(x => x.Id == 1)
+      .Include(x => x.Meals.Where(y => DateOnly.FromDateTime(y.ActiveOn) == _currentDate))
+      .ThenInclude(x => x.Ingredients)
+      .AsNoTracking()
+      .FirstAsync();
+
+      StateHasChanged();
+    }
+  }
+}

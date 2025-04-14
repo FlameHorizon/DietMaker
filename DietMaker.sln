@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataImporter", "DataImporte
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{D56BEC83-C344-4448-9F13-70D2FE39A076}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Website", "Website\Website.csproj", "{FDA48590-B14B-4EFD-AAE3-61C0A8078227}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{D56BEC83-C344-4448-9F13-70D2FE39A076}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D56BEC83-C344-4448-9F13-70D2FE39A076}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D56BEC83-C344-4448-9F13-70D2FE39A076}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDA48590-B14B-4EFD-AAE3-61C0A8078227}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDA48590-B14B-4EFD-AAE3-61C0A8078227}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDA48590-B14B-4EFD-AAE3-61C0A8078227}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDA48590-B14B-4EFD-AAE3-61C0A8078227}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

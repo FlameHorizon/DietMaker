@@ -16,10 +16,12 @@ public class Meal
     public string Description { get; set; }
 
     [JsonPropertyName("ingredients")]
-    public List<Ingredient> Ingredients { get; set; }
+    public List<Ingredient> Ingredients { get; set; } = [];
 
     [JsonPropertyName("preparation")]
-    public List<string> Preparation { get; set; }
+    public List<string> Preparation { get; set; } = [];
 
     public int DietId { get; set; }
+
+    public DateTime ActiveOn { get; set; } = DateTime.MinValue;
 }

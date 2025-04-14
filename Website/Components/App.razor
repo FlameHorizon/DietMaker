@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["Website.styles.css"]" />
+    <ImportMap />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet @rendermode="@PageRenderMode"/>
+
+</head>
+
+<body>
+    <Routes @rendermode="@PageRenderMode"/>
+    <script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>
+
+@code {
+
+  /*
+   All of this because render mode...
+   When rendermode is set to InteractiveServer HTTP context is passed twice.
+   First HTTP context is passed when pre-render things are happening.
+   Second time, when page is fully loaded, but this time HTTP context is null and can't be used meaningfully.
+   
+   Because of that, for certain pages which are using HTTP context I need to set rendermode to null.
+   In my case, these are login and logout pages.
+   Source: https://forum.radzen.com/t/problem-with-httpcontext-and-interactive-rendering/16167/6
+   Source: https://learn.microsoft.com/en-us/aspnet/core/blazor/components/render-modes?view=aspnetcore-9.0#static-ssr-pages-in-an-interactive-app
+  */
+  [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+
+  private IComponentRenderMode? PageRenderMode => HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;
+}
+
