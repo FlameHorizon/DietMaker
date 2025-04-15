@@ -33,6 +33,10 @@ System.Console.WriteLine($"Found '{meals.Count()}' different meals.");
 
 using var ctx = new DietDbContext();
 using var transaction = ctx.Database.BeginTransaction();
+
+// Add diet id, for know, it will be always 1, as this is my first diet plan.
+meals.ForEach(x => x.DietId = 1);
+
 await ctx.Meals.AddRangeAsync(meals);
 
 int affected = await ctx.SaveChangesAsync();
