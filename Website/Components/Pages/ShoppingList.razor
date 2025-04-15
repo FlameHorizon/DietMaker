@@ -1,0 +1,134 @@
+@page "/shoppingList"
+
+@using Microsoft.EntityFrameworkCore
+@using Shared
+@using Shared.Models
+
+@inject IDbContextFactory<DietDbContext> DbContextFactory
+
+<PageTitle>Shopping lists</PageTitle>
+
+<div class="container">
+  @foreach(var shoppingList in _shoppingList)
+  {
+    <div class="card">
+      <h3 class="card-title">@shoppingList.Start - @shoppingList.End</h3>
+      <ul>
+	@foreach(var kvp in shoppingList.Items) 
+	{
+	  <li>@kvp.Key, @kvp.Value g</li>
+	}
+      </ul>
+    </div>
+  }
+</div>
+
+@code
+{
+  private Diet _diet = new();
+  private DateTime _dietStart = DateTime.MinValue;
+  private DateTime _dietEnd = DateTime.MaxValue;
+  private List<ShoppingListInfo> _shoppingList = [];
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      await using DietDbContext ctx = await DbContextFactory.CreateDbContextAsync();
+
+      _diet = await ctx
+	.Diets
+	.Where(x => x.Id == 1)
+	.Include(x => x.Meals)
+	.ThenInclude(x => x.Ingredients)
+	.AsNoTracking()
+	.FirstAsync();
+
+      // Get start and end point of the diet
+      _dietStart = _diet.Meals.MinBy(x => x.ActiveOn)!.ActiveOn;
+      _dietEnd = _diet.Meals.MaxBy(x => x.ActiveOn)!.ActiveOn;
+
+      DateTime currentStart = _dietStart;
+      DateTime currentEnd = currentStart.AddDays(1);
+
+      // Work in chunks of two days.
+
+      IEnumerable<Meal> meals = Enumerable.Empty<Meal>();
+      var dict = new Dictionary<string, double>();
+      ShoppingListInfo shoppingListInfo;
+      while (currentEnd <= _dietEnd)
+      {
+	meals = _diet.Meals
+	  .Where(x => x.ActiveOn >= currentStart 
+	      && x.ActiveOn <= currentEnd
+	      && x.Name != "Lunch");
+
+	shoppingListInfo = new();
+  
+	shoppingListInfo.Start = currentStart;
+	shoppingListInfo.End = currentEnd;
+
+	dict = CreateShoppingListItems(meals);
+	shoppingListInfo.Items = dict;
+
+	_shoppingList.Add(shoppingListInfo);
+
+	// Avoid overlaps in days.
+	currentStart = currentEnd.AddDays(1);
+	currentEnd = currentEnd.AddDays(2);
+      }
+
+      // Deal with case where currentEnd falls after _dietEnd
+      // but currentStart is still within acceptable range.
+      // Basically, do one more iteration with currect range.
+      currentEnd = currentEnd > _dietEnd ? _dietEnd : currentEnd;
+
+      meals = _diet.Meals
+	.Where(x => x.ActiveOn >= currentStart 
+	    && x.ActiveOn <= currentEnd
+	    && x.Name != "Lunch");
+
+      shoppingListInfo = new();
+
+      shoppingListInfo.Start = currentStart;
+      shoppingListInfo.End = currentEnd;
+
+      dict = CreateShoppingListItems(meals);
+      shoppingListInfo.Items = dict;
+
+      _shoppingList.Add(shoppingListInfo);
+
+      StateHasChanged();
+    }
+  }
+
+  private Dictionary<string, double> CreateShoppingListItems(IEnumerable<Meal> meals)
+  {
+    var result = new Dictionary<string, double>();
+    foreach (Meal meal in meals)
+    {
+      foreach (Ingredient ing in meal.Ingredients)
+      {
+	string raw = ing.Quantity.Replace(" g", "").Replace(".", ",");
+	double value = Convert.ToDouble(raw);
+	if (result.ContainsKey(ing.Name))
+	{
+	  result[ing.Name] += value;
+	}
+	else
+	{
+	  result.Add(ing.Name, value);
+	}
+      }
+    }
+
+    return result;
+  }
+
+  private class ShoppingListInfo
+  {
+    public DateTime Start { get; set; } = DateTime.MinValue;
+    public DateTime End { get; set; } = DateTime.MaxValue;
+    public Dictionary<string, double> Items { get; set; } = [];
+  }
+}
