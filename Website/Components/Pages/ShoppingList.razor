@@ -11,14 +11,22 @@
 <div class="container">
   @foreach(var shoppingList in _shoppingList)
   {
-    <div class="card">
-      <h3 class="card-title">@shoppingList.Start - @shoppingList.End</h3>
-      <ul>
-	@foreach(var kvp in shoppingList.Items) 
-	{
-	  <li>@kvp.Key, @kvp.Value g</li>
-	}
-      </ul>
+    <div class="card mb-4">
+      <div class="card-body">
+	<h3 class="card-title">
+	  @{
+	    string startFormat = shoppingList.Start.ToString("dd MMM");
+	    string endFormat = shoppingList.End.ToString("dd MMM");
+	  }
+	  @startFormat - @endFormat
+	</h3>
+	  <ul>
+	    @foreach(var kvp in shoppingList.Items) 
+	    {
+	      <li>@kvp.Key, @kvp.Value g</li>
+	    }
+	  </ul>
+	</div>
     </div>
   }
 </div>
